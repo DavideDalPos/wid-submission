@@ -13,7 +13,6 @@
 
   <section class="container mx-auto p-4 sm:pt-10 max-w-2xl">
 
-    <!-- Title -->
     <div class="text-center mb-8">
       <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
         Submit a published paper
@@ -23,34 +22,53 @@
       </p>
     </div>
 
-    <!-- Intro callout, matching the site style -->
-    <div class="bg-gray-100 border-l-4 border-red-800 p-4 rounded-md shadow-sm mb-8">
-      <p class="text-gray-700 leading-relaxed">
-        Know of a published paper that is not yet included in WID? Paste the full citation or a DOI below.
-        No account is needed — your submission goes straight to our editorial team.
-      </p>
-    </div>
-
-    <!-- Form -->
     <div class="space-y-4">
-      <div>
-        <label for="citation" class="block font-semibold text-gray-800 mb-1">
-          Publication (full citation or DOI)
-        </label>
-        <textarea id="citation" rows="3"
-          placeholder="Author(s), year, title, journal — or a DOI"
-          class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400"></textarea>
-      </div>
 
       <div>
-        <label for="name" class="block font-semibold text-gray-800 mb-1">
-          Your name <span class="font-normal text-gray-500">(optional)</span>
+        <label for="authors" class="block font-semibold text-gray-800 mb-1">
+          Author(s) <span class="text-red-700">*</span>
         </label>
-        <input id="name" type="text"
+        <input id="authors" type="text" placeholder="e.g. Dal Pos, D. &amp; Smith, J."
           class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
       </div>
 
-      <!-- honeypot: hidden from people, catches bots -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="sm:col-span-1">
+          <label for="year" class="block font-semibold text-gray-800 mb-1">Year</label>
+          <input id="year" type="text" inputmode="numeric" placeholder="2026"
+            class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="journal" class="block font-semibold text-gray-800 mb-1">Journal / source</label>
+          <input id="journal" type="text" placeholder="e.g. ZooKeys"
+            class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
+        </div>
+      </div>
+
+      <div>
+        <label for="title" class="block font-semibold text-gray-800 mb-1">
+          Title <span class="text-red-700">*</span>
+        </label>
+        <input id="title" type="text" placeholder="Full title of the publication"
+          class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
+      </div>
+
+      <div>
+        <label for="doi" class="block font-semibold text-gray-800 mb-1">DOI</label>
+        <input id="doi" type="text" placeholder="10.3897/zookeys.123.4567  (or full DOI link)"
+          class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
+        <p class="text-sm text-gray-400 mt-1">Just the DOI is enough — we'll turn it into a link.</p>
+      </div>
+
+      <div>
+        <label for="submitter" class="block font-semibold text-gray-800 mb-1">
+          Your name <span class="font-normal text-gray-500">(optional)</span>
+        </label>
+        <input id="submitter" type="text"
+          class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
+      </div>
+
+      <!-- honeypot -->
       <input type="text" id="hp_field" tabindex="-1" autocomplete="off" aria-hidden="true"
         class="absolute -left-[9999px]" />
 
@@ -62,27 +80,35 @@
       <div id="msg" class="mt-2 leading-relaxed whitespace-pre-wrap break-words"></div>
     </div>
 
-    <p class="text-center text-sm text-gray-400 mt-10">
-      World Ichneumonidae Database
-    </p>
+    <p class="text-center text-sm text-gray-400 mt-10">World Ichneumonidae Database</p>
 
   </section>
 
   <script>
     const btn = document.getElementById('submit');
     const msg = document.getElementById('msg');
+    const val = id => document.getElementById(id).value.trim();
+
     btn.addEventListener('click', async () => {
-      const citation = document.getElementById('citation').value.trim();
-      if (!citation) { msg.textContent = 'Please enter a citation or DOI.'; msg.className = 'mt-2 text-red-700'; return; }
+      const authors = val('authors');
+      const title = val('title');
+      if (!authors || !title) {
+        msg.textContent = 'Please fill in at least the author(s) and the title.';
+        msg.className = 'mt-2 text-red-700';
+        return;
+      }
       btn.disabled = true; msg.textContent = 'Submitting…'; msg.className = 'mt-2 text-gray-500';
       try {
         const r = await fetch('/.netlify/functions/submit-paper', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            citation,
-            name: document.getElementById('name').value,
-            website: document.getElementById('hp_field').value
+            authors, title,
+            year: val('year'),
+            journal: val('journal'),
+            doi: val('doi'),
+            name: val('submitter'),
+            website: val('hp_field')
           })
         });
         if (!r.ok) {
@@ -92,8 +118,7 @@
         }
         msg.textContent = 'Thank you — your submission was received. We appreciate it!';
         msg.className = 'mt-2 text-green-700 font-medium';
-        document.getElementById('citation').value = '';
-        document.getElementById('name').value = '';
+        ['authors','year','journal','title','doi','submitter'].forEach(id => document.getElementById(id).value = '');
       } catch (e) {
         msg.textContent = 'Network error — please check your connection and try again.';
         msg.className = 'mt-2 text-red-700';
