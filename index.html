@@ -7,19 +7,21 @@
   <style>
     body { font-family: Georgia, serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; color: #1a1a2e; }
     h1 { font-size: 1.4rem; }
+    p.intro { color: #444; }
     label { display: block; margin-top: 1rem; font-weight: bold; font-size: .95rem; }
     textarea, input[type=text] { width: 100%; padding: .6rem; margin-top: .3rem; border: 1px solid #bbb; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
     button { margin-top: 1.2rem; background: #8a5a2b; color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; }
-    button:disabled { opacity: .5; }
+    button:hover { background: #6f4722; }
+    button:disabled { opacity: .5; cursor: default; }
     .hp { position: absolute; left: -9999px; }
-    .msg { margin-top: 1rem; white-space: pre-wrap; word-break: break-word; }
+    .msg { margin-top: 1.2rem; white-space: pre-wrap; word-break: break-word; }
     .ok { color: #1a7a3a; }
     .err { color: #b02020; }
   </style>
 </head>
 <body>
   <h1>Submit a newly published paper</h1>
-  <p>Let us know about a new publication relevant to the World Ichneumonidae Database.</p>
+  <p class="intro">Know of a new publication relevant to the World Ichneumonidae Database? Let us know below — no account needed.</p>
 
   <label for="citation">Publication (full citation or DOI)</label>
   <textarea id="citation" rows="3" placeholder="Author(s), year, title, journal — or a DOI"></textarea>
@@ -27,7 +29,7 @@
   <label for="name">Your name (optional)</label>
   <input id="name" type="text" />
 
-  <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <input class="hp" type="text" id="hp_field" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
   <button id="submit">Submit paper</button>
   <div class="msg" id="msg"></div>
@@ -46,27 +48,12 @@
           body: JSON.stringify({
             citation,
             name: document.getElementById('name').value,
-            website: document.getElementById('website').value
+            website: document.getElementById('hp_field').value
           })
         });
-        const text = await r.text();
         if (!r.ok) {
-          msg.textContent = 'ERROR ' + r.status + ':\n' + text;
+          msg.textContent = 'Sorry, something went wrong on our end. Please try again in a moment.';
           msg.className = 'msg err';
-          btn.disabled = false;
           return;
         }
-        msg.textContent = 'Thank you — your submission was received!';
-        msg.className = 'msg ok';
-        document.getElementById('citation').value = '';
-        document.getElementById('name').value = '';
-      } catch (e) {
-        msg.textContent = 'Network error: ' + e.message;
-        msg.className = 'msg err';
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  </script>
-</body>
-</html>
+        msg.textContent = 'Thank you — your
