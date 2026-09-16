@@ -56,4 +56,17 @@
           msg.className = 'msg err';
           return;
         }
-        msg.textContent = 'Thank you — your
+        msg.textContent = 'Thank you — your submission was received. We appreciate it!';
+        msg.className = 'msg ok';
+        document.getElementById('citation').value = '';
+        document.getElementById('name').value = '';
+      } catch (e) {
+        msg.textContent = 'Network error — please check your connection and try again.';
+        msg.className = 'msg err';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
