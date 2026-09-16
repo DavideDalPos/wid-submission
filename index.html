@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submit a paper — World Ichneumonidae Database</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; color: #1a1a2e; }
+    h1 { font-size: 1.4rem; }
+    label { display: block; margin-top: 1rem; font-weight: bold; font-size: .95rem; }
+    textarea, input[type=text] { width: 100%; padding: .6rem; margin-top: .3rem; border: 1px solid #bbb; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    button { margin-top: 1.2rem; background: #8a5a2b; color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    button:disabled { opacity: .5; }
+    .hp { position: absolute; left: -9999px; }
+    .msg { margin-top: 1rem; }
+    .ok { color: #1a7a3a; }
+    .err { color: #b02020; }
+  </style>
+</head>
+<body>
+  <h1>Submit a newly published paper</h1>
+  <p>Let us know about a new publication relevant to the World Ichneumonidae Database.</p>
+
+  <label for="citation">Publication (full citation or DOI)</label>
+  <textarea id="citation" rows="3" placeholder="Author(s), year, title, journal — or a DOI"></textarea>
+
+  <label for="name">Your name (optional)</label>
+  <input id="name" type="text" />
+
+  <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+  <button id="submit">Submit paper</button>
+  <div class="msg" id="msg"></div>
+
+  <script>
+    const btn = document.getElementById('submit');
+    const msg = document.getElementById('msg');
+    btn.addEventListener('click', async () => {
+      const citation = document.getElementById('citation').value.trim();
+      if (!citation) { msg.textContent = 'Please enter a citation or DOI.'; msg.className = 'msg err'; return; }
+      btn.disabled = true; msg.textContent = 'Submitting…'; msg.className = 'msg';
+      try {
+        const r = await fetch('/.netlify/functions/submit-paper', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            citation,
+            name: document.getElementById('name').value,
+            website: document.getElementById('website').value
+          })
+        });
+        if (!r.ok) throw new Error();
+        msg.textContent = 'Thank you — your submission was received!';
+        msg.className = 'msg ok';
+        document.getElementById('citation').value = '';
+        document.getElementById('name').value = '';
+      } catch {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.className = 'msg err';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
