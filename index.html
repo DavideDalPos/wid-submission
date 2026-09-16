@@ -34,12 +34,12 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="sm:col-span-1">
-          <label for="year" class="block font-semibold text-gray-800 mb-1">Year</label>
+          <label for="year" class="block font-semibold text-gray-800 mb-1">Year <span class="text-red-700">*</span></label>
           <input id="year" type="text" inputmode="numeric" placeholder="2026"
             class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
         </div>
         <div class="sm:col-span-2">
-          <label for="journal" class="block font-semibold text-gray-800 mb-1">Journal / source</label>
+          <label for="journal" class="block font-semibold text-gray-800 mb-1">Journal / source <span class="text-red-700">*</span></label>
           <input id="journal" type="text" placeholder="e.g. ZooKeys"
             class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
         </div>
@@ -54,7 +54,9 @@
       </div>
 
       <div>
-        <label for="doi" class="block font-semibold text-gray-800 mb-1">DOI</label>
+        <label for="doi" class="block font-semibold text-gray-800 mb-1">
+          DOI <span class="font-normal text-gray-500">(optional)</span>
+        </label>
         <input id="doi" type="text" placeholder="10.3897/zookeys.123.4567  (or full DOI link)"
           class="w-full rounded-md border border-gray-300 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400" />
         <p class="text-sm text-gray-400 mt-1">Just the DOI is enough — we'll turn it into a link.</p>
@@ -92,8 +94,10 @@
     btn.addEventListener('click', async () => {
       const authors = val('authors');
       const title = val('title');
-      if (!authors || !title) {
-        msg.textContent = 'Please fill in at least the author(s) and the title.';
+      const year = val('year');
+      const journal = val('journal');
+      if (!authors || !title || !year || !journal) {
+        msg.textContent = 'Please fill in all required fields (author, year, journal, and title).';
         msg.className = 'mt-2 text-red-700';
         return;
       }
@@ -103,9 +107,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            authors, title,
-            year: val('year'),
-            journal: val('journal'),
+            authors, title, year, journal,
             doi: val('doi'),
             name: val('submitter'),
             website: val('hp_field')
