@@ -12,7 +12,7 @@
     button { margin-top: 1.2rem; background: #8a5a2b; color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; }
     button:disabled { opacity: .5; }
     .hp { position: absolute; left: -9999px; }
-    .msg { margin-top: 1rem; }
+    .msg { margin-top: 1rem; white-space: pre-wrap; word-break: break-word; }
     .ok { color: #1a7a3a; }
     .err { color: #b02020; }
   </style>
@@ -49,13 +49,19 @@
             website: document.getElementById('website').value
           })
         });
-        if (!r.ok) throw new Error();
+        const text = await r.text();
+        if (!r.ok) {
+          msg.textContent = 'ERROR ' + r.status + ':\n' + text;
+          msg.className = 'msg err';
+          btn.disabled = false;
+          return;
+        }
         msg.textContent = 'Thank you — your submission was received!';
         msg.className = 'msg ok';
         document.getElementById('citation').value = '';
         document.getElementById('name').value = '';
-      } catch {
-        msg.textContent = 'Something went wrong. Please try again.';
+      } catch (e) {
+        msg.textContent = 'Network error: ' + e.message;
         msg.className = 'msg err';
       } finally {
         btn.disabled = false;
