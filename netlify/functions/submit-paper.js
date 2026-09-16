@@ -15,8 +15,8 @@ exports.handler = async (event) => {
   const doiRaw = clean(data.doi, 200);
   const name = clean(data.name, 200) || 'Anonymous';
 
-  if (!authors || !title) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Authors and title are required' }) };
+  if (!authors || !title || !year || !journal) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Authors, year, journal, and title are required' }) };
   }
 
   // Normalise DOI: strip any URL prefix, then rebuild a clean link
@@ -31,9 +31,9 @@ exports.handler = async (event) => {
 
   const bodyLines = [
     `**Authors:** ${authors}`,
-    year ? `**Year:** ${year}` : null,
+    `**Year:** ${year}`,
     `**Title:** ${title}`,
-    journal ? `**Journal / source:** ${journal}` : null,
+    `**Journal / source:** ${journal}`,
     doiLink ? `**DOI:** [${doiLink}](${doiLink})` : null,
     ``,
     `---`,
